@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Engine/TriggerVolume.h"
 #include "OpenDoor.generated.h"
 
 
@@ -23,12 +24,25 @@ protected:
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	void OpenDoor(float DeltaTime);
+	void CloseDoor(float DeltaTime);
+	void RotateDoor(float DeltaTime, FRotator DoorRotation, float InterpolationSpeed);
 
 private:
 	float InitialYaw;
 	float CurrentYaw;
+	float DoorLastOpenedTimestamp = 0.f;
+
+	UPROPERTY(EditAnywhere)
+	float DoorCloseDelay;
 
 	// We use UPROPERTY to expose the values to the unreal editor
 	UPROPERTY(EditAnywhere)
-	float TargetYaw = 90.f;
+	float OpenAngle = 90.f;
+
+	UPROPERTY(EditAnywhere)
+	ATriggerVolume* PressurePlate;
+
+	UPROPERTY(EditAnywhere)
+	AActor* ActorThatOpens;
 };

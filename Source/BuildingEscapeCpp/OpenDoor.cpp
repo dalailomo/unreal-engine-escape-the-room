@@ -1,6 +1,7 @@
 // Copyright 2020 example here. Set from project settings
 
-
+#include "Engine/World.h"
+#include "GameFramework/PlayerController.h"
 #include "OpenDoor.h"
 #include "GameFramework/Actor.h"
 
@@ -21,7 +22,12 @@ void UOpenDoor::BeginPlay()
 	Super::BeginPlay();
 	InitialYaw = GetOwner()->GetActorRotation().Yaw;
 	CurrentYaw = InitialYaw;
-	TargetYaw += InitialYaw;
+	OpenAngle += InitialYaw;
+
+	// Protect against null pointers because if not unreal engine crashes
+	if (!PressurePlate) UE_LOG(LogTemp, Error, TEXT("Actor '%s' has no pressure plate set!!!"), *GetOwner()->GetName());
+
+	ActorThatOpens = GetWorld()->GetFirstPlayerController()->GetPawn();
 }
 
 
@@ -30,19 +36,39 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+	if (PressurePlate && PressurePlate->IsOverlappingActor(ActorThatOpens))
+	{
+		DoorLastOpenedTimestamp = GetWorld()->GetTimeSeconds();
+		OpenDoor(DeltaTime);
+	}
+	else 
+	{
+		if (GetWorld()->GetTimeSeconds() - DoorLastOpenedTimestamp > DoorCloseDelay) CloseDoor(DeltaTime);
+	}
+}
 
-	FRotator DoorRotation { 0.f, TargetYaw, 0.f };
-	CurrentYaw = GetOwner()->GetActorRotation().Yaw;
-
-	if (CurrentYaw >= TargetYaw - 1.f) return;
-
-	UE_LOG(LogTemp, Warning, TEXT("Rotation is: %s"), *GetOwner()->GetActorRotation().ToString());
-	UE_LOG(LogTemp, Warning, TEXT("Rotation yaw is: %f"), GetOwner()->GetActorRotation().Yaw);
-
-	//OpenDoorRotator.Yaw = FMath::Lerp(CurrentYaw, TargetYaw, 0.05f); // This is exponential interpolation, tied to the framerate
-	//OpenDoorRotator.Yaw = FMath::FInterpConstantTo(CurrentYaw, TargetYaw, DeltaTime, 45); // This is linear interpolation, independent of framerate
+/*
+	NOTES:
+	OpenDoorRotator.Yaw = FMath::Lerp(CurrentYaw, TargetYaw, 0.05f); // This is exponential interpolation, tied to the framerate
+	OpenDoorRotator.Yaw = FMath::FInterpConstantTo(CurrentYaw, TargetYaw, DeltaTime, 45); // This is linear interpolation, independent of framerate
 	DoorRotation.Yaw = FMath::FInterpTo(CurrentYaw, TargetYaw, DeltaTime, 2); // This is exponential interpolation, independent of framerate
+*/
 
+void UOpenDoor::OpenDoor(float DeltaTime)
+{
+	FRotator DoorRotation{ 0.f, OpenAngle, 0.f };
+	RotateDoor(DeltaTime, DoorRotation, 2.f);
+}
+
+void UOpenDoor::CloseDoor(float DeltaTime)
+{
+	FRotator DoorRotation{ 0.f, InitialYaw, 0.f };
+	RotateDoor(DeltaTime, DoorRotation, 4.f);
+}
+
+void UOpenDoor::RotateDoor(float DeltaTime, FRotator DoorRotation, float InterpolationSpeed)
+{
+	CurrentYaw = FMath::FInterpTo(CurrentYaw, DoorRotation.Yaw, DeltaTime, InterpolationSpeed);
+	DoorRotation.Yaw = CurrentYaw;
 	GetOwner()->SetActorRotation(DoorRotation);
 }

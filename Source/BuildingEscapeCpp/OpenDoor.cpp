@@ -19,11 +19,6 @@ UOpenDoor::UOpenDoor()
 void UOpenDoor::BeginPlay()
 {
 	Super::BeginPlay();
-
-	FRotator CurrentRotation = GetOwner()->GetActorRotation();
-	CurrentRotation.Yaw = 90.f;
-	//FRotator OpenedDoor = { 0.f, 90.f, 0.f }; // another way of creating an F rotator
-	GetOwner()->SetActorRotation(CurrentRotation);
 }
 
 
@@ -33,5 +28,18 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
-}
 
+	FRotator OpenDoorRotator { 0.f, TargetYaw, 0.f };
+	float CurrentYaw = GetOwner()->GetActorRotation().Yaw;
+
+	if (CurrentYaw >= TargetYaw - 1.f) return;
+
+	UE_LOG(LogTemp, Warning, TEXT("Rotation is: %s"), *GetOwner()->GetActorRotation().ToString());
+	UE_LOG(LogTemp, Warning, TEXT("Rotation yaw is: %f"), GetOwner()->GetActorRotation().Yaw);
+
+	//OpenDoorRotator.Yaw = FMath::Lerp(CurrentYaw, TargetYaw, 0.05f); // This is exponential interpolation, tied to the framerate
+	//OpenDoorRotator.Yaw = FMath::FInterpConstantTo(CurrentYaw, TargetYaw, DeltaTime, 45); // This is linear interpolation, independent of framerate
+	OpenDoorRotator.Yaw = FMath::FInterpTo(CurrentYaw, TargetYaw, DeltaTime, 2); // This is exponential interpolation, independent of framerate
+
+	GetOwner()->SetActorRotation(OpenDoorRotator);
+}

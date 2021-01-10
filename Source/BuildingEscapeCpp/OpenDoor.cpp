@@ -19,6 +19,9 @@ UOpenDoor::UOpenDoor()
 void UOpenDoor::BeginPlay()
 {
 	Super::BeginPlay();
+	InitialYaw = GetOwner()->GetActorRotation().Yaw;
+	CurrentYaw = InitialYaw;
+	TargetYaw += InitialYaw;
 }
 
 
@@ -29,8 +32,8 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 
 	// ...
 
-	FRotator OpenDoorRotator { 0.f, TargetYaw, 0.f };
-	float CurrentYaw = GetOwner()->GetActorRotation().Yaw;
+	FRotator DoorRotation { 0.f, TargetYaw, 0.f };
+	CurrentYaw = GetOwner()->GetActorRotation().Yaw;
 
 	if (CurrentYaw >= TargetYaw - 1.f) return;
 
@@ -39,7 +42,7 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 
 	//OpenDoorRotator.Yaw = FMath::Lerp(CurrentYaw, TargetYaw, 0.05f); // This is exponential interpolation, tied to the framerate
 	//OpenDoorRotator.Yaw = FMath::FInterpConstantTo(CurrentYaw, TargetYaw, DeltaTime, 45); // This is linear interpolation, independent of framerate
-	OpenDoorRotator.Yaw = FMath::FInterpTo(CurrentYaw, TargetYaw, DeltaTime, 2); // This is exponential interpolation, independent of framerate
+	DoorRotation.Yaw = FMath::FInterpTo(CurrentYaw, TargetYaw, DeltaTime, 2); // This is exponential interpolation, independent of framerate
 
-	GetOwner()->SetActorRotation(OpenDoorRotator);
+	GetOwner()->SetActorRotation(DoorRotation);
 }

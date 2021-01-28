@@ -1,3 +1,4 @@
+
 // Copyright 2020 example here. Set from project settings
 
 #pragma once

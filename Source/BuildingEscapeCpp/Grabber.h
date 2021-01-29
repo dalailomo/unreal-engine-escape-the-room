@@ -1,19 +1,20 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2020 example here. Set from project settings
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "WorldPosition.generated.h"
+#include "Grabber.generated.h"
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class BUILDINGESCAPECPP_API UWorldPosition : public UActorComponent
+class BUILDINGESCAPECPP_API UGrabber : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:	
 	// Sets default values for this component's properties
-	UWorldPosition();
+	UGrabber();
 
 protected:
 	// Called when the game starts

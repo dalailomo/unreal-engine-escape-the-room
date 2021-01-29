@@ -1,9 +1,10 @@
 // Copyright 2020 example here. Set from project settings
 
 
+#include "Engine/World.h"
+#include "DrawDebugHelpers.h"
 #include "GameFramework/PlayerController.h"
 #include "Grabber.h"
-#include "Engine/World.h"
 
 #define OUT
 
@@ -41,8 +42,25 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 		OUT PlayerViewpointRotation
 	);
 
-	// Logging out to test
-	UE_LOG(LogTemp, Warning, TEXT("l:%s||r:%s"), *PlayerViewpointLocation.ToString(), *PlayerViewpointRotation.ToString());
+	//// Logging out to test
+	/*UE_LOG(LogTemp, Warning, TEXT("l:%s||r:%s"), 
+		*PlayerViewpointLocation.ToString(), 
+		*PlayerViewpointRotation.ToString()
+	);*/
+
+	// Draw a line from player showing the reach
+	FVector LineTraceEnd = PlayerViewpointLocation + PlayerViewpointRotation.Vector() * Reach;
+
+	DrawDebugLine(
+		GetWorld(),
+		PlayerViewpointLocation,
+		LineTraceEnd,
+		FColor(0, 255, 0),
+		false,
+		0.f,
+		0,
+		5.f
+	);
 
 	// Raycast out to a certain distance (Reach)
 

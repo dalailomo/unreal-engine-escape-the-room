@@ -18,31 +18,13 @@ UGrabber::UGrabber()
 	// ...
 }
 
-
 // Called when the game starts
 void UGrabber::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UE_LOG(LogTemp, Warning, TEXT("Grabber is workin"));
-
-	// Check for physics handle component
-	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
-	if (PhysicsHandle)
-	{
-		
-	}
-	else {
-		UE_LOG(LogTemp, Error, TEXT("PhysicsHandle is not present for  %s"), *(GetOwner()->GetName()));
-	}
-
-	InputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
-	if (InputComponent)
-	{
-		// Name has to be the same as set in project settings input bindings
-		InputComponent->BindAction("Grab", IE_Pressed, this, &UGrabber::Grab);
-		InputComponent->BindAction("Grab", IE_Released, this, &UGrabber::Release);
-	}
+	FindPhysicsHandle();
+	SetupInputComponent();
 }
 
 void UGrabber::Grab()
@@ -55,8 +37,35 @@ void UGrabber::Release()
 	UE_LOG(LogTemp, Warning, TEXT("Grabber released"));
 }
 
+void UGrabber::FindPhysicsHandle()
+{
+	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
+	if (PhysicsHandle)
+	{
+
+	}
+	else {
+		UE_LOG(LogTemp, Error, TEXT("PhysicsHandle is not present for  %s"), *(GetOwner()->GetName()));
+	}
+}
+
+void UGrabber::SetupInputComponent()
+{
+	InputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
+	if (InputComponent)
+	{
+		// Name has to be the same as set in project settings input bindings
+		InputComponent->BindAction("Grab", IE_Pressed, this, &UGrabber::Grab);
+		InputComponent->BindAction("Grab", IE_Released, this, &UGrabber::Release);
+	}
+}
+
 // Called every frame
-void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UGrabber::TickComponent(
+	float DeltaTime, 
+	ELevelTick TickType, 
+	FActorComponentTickFunction* ThisTickFunction
+)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
@@ -109,4 +118,3 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 	}
 	
 }
-

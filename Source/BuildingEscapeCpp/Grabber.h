@@ -7,6 +7,12 @@
 #include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "Grabber.generated.h"
 
+struct PlayerLineTraceEndMeta {
+	FVector PlayerViewpointLocation;
+	FRotator PlayerViewpointRotation;
+	FVector LineTraceEnd;
+};
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BUILDINGESCAPECPP_API UGrabber : public UActorComponent
 {
@@ -45,4 +51,6 @@ private:
 	something with it
 	*/
 	FHitResult GetFirstPhysicsBodyInReach() const;
+
+	PlayerLineTraceEndMeta GetPlayerLineTraceEndMeta() const;
 };

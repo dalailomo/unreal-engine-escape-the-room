@@ -1,10 +1,9 @@
 // Copyright 2020 example here. Set from project settings
 
-
+#include "Grabber.h"
 #include "Engine/World.h"
 #include "DrawDebugHelpers.h"
 #include "GameFramework/PlayerController.h"
-#include "Grabber.h"
 
 #define OUT
 
@@ -32,14 +31,26 @@ void UGrabber::Grab()
 	UE_LOG(LogTemp, Warning, TEXT("Grabber pressed"));
 
 	// Raycast when key is pressed and try and reach any actors with physics body collision channel set
+	FHitResult Target = GetFirstPhysicsBodyInReach();
+	PlayerLineTraceEndMeta PlayerLineTrace = GetPlayerLineTraceEndMeta();
+	UPrimitiveComponent* ComponentToGrab = Target.GetComponent();
 
 	// If we hit something, then we attach the physics handle
-	FHitResult Target = GetFirstPhysicsBodyInReach();
+	if (Target.GetActor())
+	{
+		PhysicsHandle->GrabComponentAtLocation(
+			ComponentToGrab,
+			NAME_None,
+			PlayerLineTrace.LineTraceEnd
+		);
+	}
 }
 
 void UGrabber::Release()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Grabber released"));
+
+	PhysicsHandle->ReleaseComponent();
 }
 
 void UGrabber::FindPhysicsHandle()
@@ -65,7 +76,7 @@ void UGrabber::SetupInputComponent()
 	}
 }
 
-FHitResult UGrabber::GetFirstPhysicsBodyInReach() const
+PlayerLineTraceEndMeta UGrabber::GetPlayerLineTraceEndMeta() const
 {
 	// Get the players viewpoint
 	FVector PlayerViewpointLocation;
@@ -78,13 +89,20 @@ FHitResult UGrabber::GetFirstPhysicsBodyInReach() const
 
 	// Raycast out to a certain distance (Reach)
 	FVector LineTraceEnd = PlayerViewpointLocation + PlayerViewpointRotation.Vector() * Reach;
+
+	return { PlayerViewpointLocation, PlayerViewpointRotation, LineTraceEnd };
+}
+
+FHitResult UGrabber::GetFirstPhysicsBodyInReach() const
+{
+	PlayerLineTraceEndMeta PlayerLineTrace = GetPlayerLineTraceEndMeta();
 	FHitResult Hit;
 	FCollisionQueryParams TraceParams(FName(TEXT("")), false, GetOwner());
 
 	GetWorld()->LineTraceSingleByObjectType(
 		OUT Hit,
-		PlayerViewpointLocation,
-		LineTraceEnd,
+		PlayerLineTrace.PlayerViewpointLocation,
+		PlayerLineTrace.LineTraceEnd,
 		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody)
 	);
 
@@ -120,7 +138,6 @@ FHitResult UGrabber::GetFirstPhysicsBodyInReach() const
 	*/
 }
 
-
 // Called every frame
 void UGrabber::TickComponent(
 	float DeltaTime, 
@@ -129,4 +146,10 @@ void UGrabber::TickComponent(
 )
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (PhysicsHandle->GrabbedComponent)
+	{
+		PlayerLineTraceEndMeta PlayerLineTrace = GetPlayerLineTraceEndMeta();
+		PhysicsHandle->SetTargetLocation(PlayerLineTrace.LineTraceEnd);
+	}
 }

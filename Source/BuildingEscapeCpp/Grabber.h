@@ -30,4 +30,5 @@ private:
 	UPhysicsHandleComponent* PhysicsHandle = nullptr;
 	
 	void Grab();
+	void Release();
 };

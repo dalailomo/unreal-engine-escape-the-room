@@ -30,6 +30,11 @@ void UGrabber::BeginPlay()
 void UGrabber::Grab()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Grabber pressed"));
+
+	// Raycast when key is pressed and try and reach any actors with physics body collision channel set
+
+	// If we hit something, then we attach the physics handle
+	FHitResult Target = GetFirstPhysicsBodyInReach();
 }
 
 void UGrabber::Release()
@@ -60,45 +65,19 @@ void UGrabber::SetupInputComponent()
 	}
 }
 
-// Called every frame
-void UGrabber::TickComponent(
-	float DeltaTime, 
-	ELevelTick TickType, 
-	FActorComponentTickFunction* ThisTickFunction
-)
+FHitResult UGrabber::GetFirstPhysicsBodyInReach() const
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
 	// Get the players viewpoint
 	FVector PlayerViewpointLocation;
 	FRotator PlayerViewpointRotation;
 
 	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
-		OUT PlayerViewpointLocation, 
+		OUT PlayerViewpointLocation,
 		OUT PlayerViewpointRotation
 	);
 
-	//// Logging out to test
-	/*UE_LOG(LogTemp, Warning, TEXT("l:%s||r:%s"), 
-		*PlayerViewpointLocation.ToString(), 
-		*PlayerViewpointRotation.ToString()
-	);*/
-
-	// Draw a line from player showing the reach
-	FVector LineTraceEnd = PlayerViewpointLocation + PlayerViewpointRotation.Vector() * Reach;
-
-	DrawDebugLine(
-		GetWorld(),
-		PlayerViewpointLocation,
-		LineTraceEnd,
-		FColor(0, 255, 0),
-		false,
-		0.f,
-		0,
-		5.f
-	);
-
 	// Raycast out to a certain distance (Reach)
+	FVector LineTraceEnd = PlayerViewpointLocation + PlayerViewpointRotation.Vector() * Reach;
 	FHitResult Hit;
 	FCollisionQueryParams TraceParams(FName(TEXT("")), false, GetOwner());
 
@@ -116,5 +95,38 @@ void UGrabber::TickComponent(
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s"), *(ActorHit->GetName()));
 	}
-	
+
+	return Hit;
+
+	/* debugging sheit
+	UE_LOG(LogTemp, Warning, TEXT("l:%s||r:%s"),
+		*PlayerViewpointLocation.ToString(),
+		*PlayerViewpointRotation.ToString()
+	);
+
+	// Draw a line from player showing the reach
+	FVector LineTraceEnd = PlayerViewpointLocation + PlayerViewpointRotation.Vector() * Reach;
+
+	DrawDebugLine(
+		GetWorld(),
+		PlayerViewpointLocation,
+		LineTraceEnd,
+		FColor(0, 255, 0),
+		false,
+		0.f,
+		0,
+		5.f
+	);
+	*/
+}
+
+
+// Called every frame
+void UGrabber::TickComponent(
+	float DeltaTime, 
+	ELevelTick TickType, 
+	FActorComponentTickFunction* ThisTickFunction
+)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }

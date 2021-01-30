@@ -17,7 +17,10 @@ public:
 	UGrabber();
 
 	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void TickComponent(
+		float DeltaTime, ELevelTick TickType, 
+		FActorComponentTickFunction* ThisTickFunction
+	) override;
 
 protected:
 	// Called when the game starts
@@ -34,4 +37,12 @@ private:
 
 	void FindPhysicsHandle();
 	void SetupInputComponent();
+
+	/* 
+	Return the first Actor within reach with physics body
+	The reason is const, is because we dont want the object we are hitting
+	to change while at the same time we are still trying to access it and do
+	something with it
+	*/
+	FHitResult GetFirstPhysicsBodyInReach() const;
 };

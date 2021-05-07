@@ -28,11 +28,15 @@ public:
 	void OpenDoor(float DeltaTime);
 	void CloseDoor(float DeltaTime);
 	void RotateDoor(float DeltaTime, FRotator DoorRotation, float InterpolationSpeed);
+	float TotalMassOfActors() const;
 
 private:
 	float InitialYaw;
 	float CurrentYaw;
 	float DoorLastOpenedTimestamp = 0.f;
+
+	UPROPERTY(EditAnywhere)
+	float MassToOpenDoor;
 
 	UPROPERTY(EditAnywhere)
 	float DoorCloseDelay;

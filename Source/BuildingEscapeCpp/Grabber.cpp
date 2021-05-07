@@ -34,10 +34,13 @@ void UGrabber::Grab()
 	FHitResult Target = GetFirstPhysicsBodyInReach();
 	PlayerLineTraceEndMeta PlayerLineTrace = GetPlayerLineTraceEndMeta();
 	UPrimitiveComponent* ComponentToGrab = Target.GetComponent();
+	AActor* ActorHit = Target.GetActor();
 
 	// If we hit something, then we attach the physics handle
-	if (Target.GetActor())
+	if (ActorHit)
 	{
+		if (!PhysicsHandle) { return; }
+
 		PhysicsHandle->GrabComponentAtLocation(
 			ComponentToGrab,
 			NAME_None,
@@ -49,6 +52,8 @@ void UGrabber::Grab()
 void UGrabber::Release()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Grabber released"));
+	
+	if (!PhysicsHandle) { return; }
 
 	PhysicsHandle->ReleaseComponent();
 }
@@ -56,11 +61,8 @@ void UGrabber::Release()
 void UGrabber::FindPhysicsHandle()
 {
 	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
-	if (PhysicsHandle)
+	if (!PhysicsHandle)
 	{
-
-	}
-	else {
 		UE_LOG(LogTemp, Error, TEXT("PhysicsHandle is not present for  %s"), *(GetOwner()->GetName()));
 	}
 }
@@ -146,6 +148,8 @@ void UGrabber::TickComponent(
 )
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (!PhysicsHandle) { return; }
 
 	if (PhysicsHandle->GrabbedComponent)
 	{

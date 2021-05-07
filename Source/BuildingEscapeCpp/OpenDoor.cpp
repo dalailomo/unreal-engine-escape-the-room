@@ -27,8 +27,6 @@ void UOpenDoor::BeginPlay()
 
 	// Protect against null pointers because if not unreal engine crashes
 	if (!PressurePlate) UE_LOG(LogTemp, Error, TEXT("Actor '%s' has no pressure plate set!!!"), *GetOwner()->GetName());
-
-	ActorThatOpens = GetWorld()->GetFirstPlayerController()->GetPawn();
 }
 
 
@@ -75,11 +73,14 @@ void UOpenDoor::RotateDoor(float DeltaTime, FRotator DoorRotation, float Interpo
 }
 
 float UOpenDoor::TotalMassOfActors() const
-{
+{	
 	float TotalMass = 0.f;
+
+	if (!PressurePlate) { return TotalMass; }
 
 	// Find all overlapping actors
 	TArray<AActor*> OverlappingActors;
+	
 	PressurePlate->GetOverlappingActors(OUT OverlappingActors);
 	
 	// Add up their masses
